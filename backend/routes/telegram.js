@@ -531,8 +531,17 @@ function setUserLed(idescala, iduser, horacode, sim, nao, msg, resposta) {
                         z < escala.pontos[p][u].pubs.length;
                         z++
                       ) {
-                        if (iduser != escala.pontos[p][u].pubs[z].userId)
+                        if (iduser != escala.pontos[p][u].pubs[z].userId){
                           userFriend.push(escala.pontos[p][u].pubs[z]);
+                          if(!conjugeJarespondeu){
+                          if(escala.pontos[p][u].pubs[s].conjuge){
+                          setTimeout(() => {
+                            setUserLed(idescala, escala.pontos[p][u].pubs[z].userId, horacode, sim, nao, msg, resposta, true); 
+                          }, 1000);
+                           
+                        }
+                      }
+                      }
                       }
 
                       let text = `*Substituição TPE*

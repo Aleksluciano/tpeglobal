@@ -4,7 +4,8 @@ import { AuthService } from "./auth.service";
 import { User } from "./user.model";
 import { Congregation } from "../setup/congregation.model";
 import { Circuito } from "../setup/circuito.model";
-
+import { switchMap } from 'rxjs/operators';
+import { pipe } from 'rxjs';
 
 
 @Component({
@@ -155,6 +156,8 @@ error => console.error(error)
     let iduser = this.userId;
     let idescala = esc._id;
     let indexpub;
+    let conjuge;
+    let indexConjuge;
 
     for(let a=0;a<grupo.length;a++){
 
@@ -162,8 +165,11 @@ error => console.error(error)
       if (grupo[a].ponto.pubs[s].userId == this.userId){
         grupo[a].ponto.pubs[s].sim = true;
         grupo[a].ponto.pubs[s].nao = false;
-
-       esc.type = true;
+        if(grupo[a].ponto.pubs[s].conjuge){ 
+          conjuge = grupo[a].ponto.pubs[s].conjuge;
+          indexConjuge = grupo[a].ponto.pubs.findIndex(x => x.userId == conjuge);
+        }
+       esc.type = false;
        horacode = grupo[a].hora.code;
        indexpub = s;
        break;
@@ -181,11 +187,12 @@ error => console.error(error)
 
      }
 
-    this.authService.ledUpdate(obj)
-            .subscribe(
-            data => {
-                console.log(data);
-            },
+     if(conjuge && indexConjuge > -1){
+      this.authService.ledUpdate(obj)
+        .pipe(
+          switchMap(
+          data => this.authService.ledUpdate(obj)
+          )).subscribe( data => console.log(data),
             error =>
             {
               if (error.title == "Respondido pelo Telegram!")this.rebuild();
@@ -208,7 +215,31 @@ error => console.error(error)
             console.error(error)
             }
             );
-
+          }else{
+            this.authService.ledUpdate(obj)
+            .subscribe( data => console.log(data),
+              error => {
+                if (error.title == 'Respondido pelo Telegram!') this.rebuild();
+                else {
+                  console.log(error);
+                  for (let a = 0; a < grupo.length; a++) {
+      
+                    for (let s = 0; s < grupo[a].ponto.npubs; s++) {
+                      if (grupo[a].ponto.pubs[s].userId == this.userId) {
+      
+                        esc.type = false;
+                        grupo[a].ponto.pubs[s].sim = false;
+                        grupo[a].ponto.pubs[s].nao = false;
+      
+      
+                      }
+                    }
+                  }
+                }
+                console.error(error);
+              }
+            );  
+          }
 
 
 
@@ -220,7 +251,8 @@ error => console.error(error)
     let iduser = this.userId;
     let idescala = esc._id;
     let indexpub;
-
+    let conjuge;
+    let indexConjuge;
 
     for(let a=0;a<grupo.length;a++){
 
@@ -228,7 +260,10 @@ error => console.error(error)
         if (grupo[a].ponto.pubs[s].userId == this.userId){
           grupo[a].ponto.pubs[s].sim = false;
           grupo[a].ponto.pubs[s].nao = true;
-
+          if(grupo[a].ponto.pubs[s].conjuge){ 
+            conjuge = grupo[a].ponto.pubs[s].conjuge;
+            indexConjuge = grupo[a].ponto.pubs.findIndex(x => x.userId == conjuge);
+          }
           esc.type = true;
           horacode = grupo[a].hora.code;
           indexpub = s;
@@ -248,7 +283,39 @@ error => console.error(error)
       nao: true,
 
      }
+     if(conjuge && indexConjuge > -1){
+      this.authService.ledUpdate(obj)
+      .pipe(
+      switchMap(data => this.authService.ledUpdate(obj)
+      )).subscribe(
+        data => {
+          console.log(data);
 
+        },
+        error => {
+
+          if (error.title == 'Respondido pelo Telegram!') this.rebuild();
+          else {
+            console.log(error);
+            for (let a = 0; a < grupo.length; a++) {
+
+              for (let s = 0; s < grupo[a].ponto.npubs; s++) {
+                if (grupo[a].ponto.pubs[s].userId == this.userId) {
+                  esc.type = false;
+                  grupo[a].ponto.pubs[s].sim = false;
+                  grupo[a].ponto.pubs[s].nao = false;
+
+                }
+              }
+
+            }
+          }
+
+          console.error(error);
+        }
+      );
+
+    }else{
     this.authService.ledUpdate(obj)
             .subscribe(
             data => {
@@ -282,7 +349,7 @@ else{
 
   }
 
-
+  }
 
 
   designEscala(pub, ponto, escala) {
