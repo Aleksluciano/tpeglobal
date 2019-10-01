@@ -6,10 +6,12 @@ var Sms = require('totalvoice-node').Sms;
 var nodemailer = require('nodemailer');
 var mongoose = require('mongoose');
 var LocalStorage = require('node-localstorage').LocalStorage;
-
+var telegram = require("../routes/telegram");
+const ms = require("ms");
 
 var User = require('../models/user');
 var User2 = require('../models/user');
+var UserMaster = require('../models/user');
 
 localStorage = new LocalStorage('./scratch');
 const SUPORTEMAIL = process.env.SUPORTEMAIL;
@@ -252,17 +254,17 @@ router.get('/:id', function (req, res, next) {
         f.password = " ";
 
 
-       if(req.params.id == '5ae7dee5734d1d133184274f'){
-        if (f.circuito != '5a9dd91b89999500143b70d7')return false; //61
-       }
+    //    if(req.params.id == '5ae7dee5734d1d133184274f'){
+    //     if (f.circuito != '5a9dd91b89999500143b70d7')return false; //61
+    //    }
 
-       if(req.params.id == '5ae7dfb9734d1d1331842777'){
-        if (f.circuito != '5aa985b357e93b001493b0d9')return false; //76
-       }
+    //    if(req.params.id == '5ae7dfb9734d1d1331842777'){
+    //     if (f.circuito != '5aa985b357e93b001493b0d9')return false; //76
+    //    }
 
-       if(req.params.id == '5ae7dfa1734d1d1331842774'){
-        if (f.circuito != '5aac6772fdc3730014c3785c')return false; //112
-       }
+    //    if(req.params.id == '5ae7dfa1734d1d1331842774'){
+    //     if (f.circuito != '5aac6772fdc3730014c3785c')return false; //112
+    //    }
 
        if(f.role != null && f.role != " ")return false;
        f.role = " ";
@@ -368,17 +370,17 @@ router.get('/useresc/:id', function (req, res, next) {
         f.password = " ";
 
 
-        if(req.params.id == '5ae7dee5734d1d133184274f'){
-            if (f.circuito != '5a9dd91b89999500143b70d7')return false; //61
-           }
+        // if(req.params.id == '5ae7dee5734d1d133184274f'){
+        //     if (f.circuito != '5a9dd91b89999500143b70d7')return false; //61
+        //    }
 
-           if(req.params.id == '5ae7dfb9734d1d1331842777'){
-            if (f.circuito != '5aa985b357e93b001493b0d9')return false; //76
-           }
+        //    if(req.params.id == '5ae7dfb9734d1d1331842777'){
+        //     if (f.circuito != '5aa985b357e93b001493b0d9')return false; //76
+        //    }
 
-           if(req.params.id == '5ae7dfa1734d1d1331842774'){
-            if (f.circuito != '5aac6772fdc3730014c3785c')return false; //112
-           }
+        //    if(req.params.id == '5ae7dfa1734d1d1331842774'){
+        //     if (f.circuito != '5aac6772fdc3730014c3785c')return false; //112
+        //    }
 
            if(f.role != null && f.role != " ")return false;
            f.role = " ";
@@ -529,6 +531,20 @@ router.put('/:id', function (req, res, next) {
 
 
     // var decoded = jwt.decode(req.query.token);
+    UserMaster.findById(req.params.id, function (err1, usermaster) {
+
+        if (err1) {
+            return res.status(500).json({
+                title: 'Ocorreu um erro1',
+                error: err
+            });
+        }
+        if (!usermaster) {
+            return res.status(500).json({
+                title: 'Usuário não encontrado',
+                error: {message: 'Usuário não encontrado'}
+            });
+        }
 
     User.findById(req.body.userId, function (err, user) {
 
@@ -564,10 +580,7 @@ router.put('/:id', function (req, res, next) {
        }
        else conjuge = req.body.conjuge;
 
-       if(req.params.id == '5a9dcb959d870c40c0fb8c93' ||
-       req.params.id == '5ae7dee5734d1d133184274f' ||
-       req.params.id == '5ae7dfa1734d1d1331842774' ||
-       req.params.id == '5ae7dfb9734d1d1331842777'){
+       if(usermaster.email = 'adm@adm.com'){
         user.firstName    = req.body.firstName;
         user.lastName     = req.body.lastName;
         //password
@@ -624,6 +637,8 @@ router.put('/:id', function (req, res, next) {
     });
 });
 
+});
+
 
 
 router.delete('/:id', function (req, res, next) {
@@ -654,6 +669,13 @@ router.delete('/:id', function (req, res, next) {
                     error: err
                 });
             }
+            
+            if(user.telegram){
+            telegram.bot.kickChatMember(process.env.GROUPTELEGRAM, user.telegram, {
+                until_date: Math.round((Date.now() + ms("1m")) / 1000)
+              });
+            }
+
             return res.status(200).json({
                 message: 'Usuario deletado',
                 obj: result

@@ -11,6 +11,12 @@ const Escala = require("../models/escala");
 const mongoose = require("mongoose");
 const TelegramBot = require("node-telegram-bot-api");
 const ms = require("ms");
+const cron = require("node-cron");
+
+var buttonConfirmation = [];
+cron.schedule("0 */1 * * *", () => (buttonConfirmation = []));
+
+
 
 const resetEmail1 = process.env.RESETEMAIL1;
 const resetEmail2 = process.env.RESETEMAIL2;
@@ -190,6 +196,24 @@ bot.on("callback_query", msg => {
   let index2 = msg.data.indexOf("$");
   let subdata_userid = msg.data.substring(index + 1, index2);
   let subdata_codehora = msg.data.substring(index2 + 1);
+
+  let atualData = new Date();
+  if(buttonConfirmation.find(a => ((a.code == msg.data) && (atualData.getTime() - a.data.getTime() < 12000)))){
+    //se existe cotninua o processo para o botão escolhido
+  }else{
+    let myresp = {
+      code: msg.data,
+      data: new Date()
+    }
+    buttonConfirmation.push(myresp);
+    if (subdata_quest == "S")
+    bot.answerCallbackQuery(msg.id, "Aperte novamente 'confirmar' para enviar sua resposta", true);
+    if (subdata_quest == "N")
+    bot.answerCallbackQuery(msg.id, "Aperte novamente 'recusar' para enviar sua resposta", true);
+    if (subdata_quest == "@")
+    bot.answerCallbackQuery(msg.id, "Aperte novamente 'substituir' para pegar essa substituição", true);
+    return console.log(`primeira resposta armazenada: ${msg.data}`);
+  }
 
   if (subdata_quest == "N") {
     setUserLed(
@@ -420,7 +444,7 @@ Circ: *${j.congregation.circuit}*\n`;
   });
 });
 
-function setUserLed(idescala, iduser, horacode, sim, nao, msg, resposta) {
+function setUserLed(idescala, iduser, horacode, sim, nao, msg, resposta, conjugeJarespondeu = false) {
   Led.findOne(
     {
       idescala: idescala,

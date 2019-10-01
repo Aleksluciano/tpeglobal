@@ -449,7 +449,7 @@ router.put("/led/:id", function(req, res, next) {
         });
       }
 
-      if (led.sim || led.nao) {
+      if (led.nao) {
         let resposta = {
           resp: "ja",
           sim: led.sim,

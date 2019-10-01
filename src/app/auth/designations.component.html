@@ -54,8 +54,8 @@
                 <div class="led-green"></div>
               </td>
               <td [style.color]="getStyle(pub?.sex)" style="vertical-align: middle !important; text-align: left;">{{ pub?.firstName }} {{ pub?.lastName}} </td>
-              <td style="vertical-align: middle !important; text-align: left;">{{ pub?.congregation.circuit }}</td>
-              <td style="vertical-align: middle !important; text-align: left;">{{ pub?.congregation.nome }}</td>
+              <td style="vertical-align: middle !important; text-align: left;">{{ pub?.congregation?.circuit }}</td>
+              <td style="vertical-align: middle !important; text-align: left;">{{ pub?.congregation?.nome }}</td>
               <td style="vertical-align: middle !important; text-align: left;">{{ pub?.mobilephone || pub?.phone }}</td>
               <td style="vertical-align: middle !important; text-align: left;">{{ pub?.email }}</td>
             </tr>
