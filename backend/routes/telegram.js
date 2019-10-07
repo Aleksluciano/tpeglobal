@@ -207,11 +207,11 @@ bot.on("callback_query", msg => {
     }
     buttonConfirmation.push(myresp);
     if (subdata_quest == "S")
-    bot.answerCallbackQuery(msg.id, "Aperte novamente 'confirmar' para enviar sua resposta", true);
+    bot.answerCallbackQuery(msg.id, "Quer mesmo *confirmar*? Se sim, aperte novamente *confirmar*", true);
     if (subdata_quest == "N")
-    bot.answerCallbackQuery(msg.id, "Aperte novamente 'recusar' para enviar sua resposta", true);
+    bot.answerCallbackQuery(msg.id, "Quer mesmo *recusar*? Se sim, aperte novamente *recusar*", true);
     if (subdata_quest == "@")
-    bot.answerCallbackQuery(msg.id, "Aperte novamente 'substituir' para pegar essa substituição", true);
+    bot.answerCallbackQuery(msg.id, "Quer mesmo *substituir*? Se sim, aperte novamente *substituir*", true);
     return console.log(`primeira resposta armazenada: ${msg.data}`);
   }
 

@@ -1,23 +1,23 @@
-import { SigninComponent } from "./signin.component";
-import { Component, OnInit } from "@angular/core";
-import { AuthService } from "./auth.service";
-import { User } from "./user.model";
-import { Congregation } from "../setup/congregation.model";
-import { Circuito } from "../setup/circuito.model";
-import { switchMap } from "rxjs/operators";
-import { pipe } from "rxjs";
+import { SigninComponent } from './signin.component';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from './auth.service';
+import { User } from './user.model';
+import { Congregation } from '../setup/congregation.model';
+import { Circuito } from '../setup/circuito.model';
+import { switchMap } from 'rxjs/operators';
+import { pipe } from 'rxjs';
 
 @Component({
-  selector: "app-designations",
-  templateUrl: "./designations.component.html",
-  styleUrls: ["./designations.component.css"]
+  selector: 'app-designations',
+  templateUrl: './designations.component.html',
+  styleUrls: ['./designations.component.css']
 })
 export class DesignationsComponent implements OnInit {
   escala = [];
   congregations: Congregation[] = [];
   circuitos: Circuito[] = [];
   showNow = false;
-  userId = localStorage.getItem("userId");
+  userId = localStorage.getItem('userId');
   obj = [];
   msgdefault = false;
 
@@ -38,7 +38,7 @@ export class DesignationsComponent implements OnInit {
             for (let i = 0; i < escala.length; i++) {
               for (let p = 0; p < escala[i].pontos.length; p++) {
                 for (let u = 0; u < escala[i].pontos[p].length; u++) {
-                  let achei = false;
+                  const achei = false;
                   for (let s = 0; s < escala[i].pontos[p][u].npubs; s++) {
                     if (
                       escala[i].pontos[p][u].pubs[s] == null ||
@@ -46,7 +46,7 @@ export class DesignationsComponent implements OnInit {
                     ) {
                       escala[i].pontos[p][u].pubs[s] = new User();
                     } else {
-                      let led = leds.find(a => {
+                      const led = leds.find(a => {
                         if (
                           a.iduser == escala[i].pontos[p][u].pubs[s].userId &&
                           a.idescala == escala[i]._id &&
@@ -69,8 +69,8 @@ export class DesignationsComponent implements OnInit {
                       //  pontouserid.push(escala[i].pontos[p][u].id);
                       let type = false;
                       if (
-                        escala[i].pontos[p][u].pubs[s].tipoesc == "S" ||
-                        //escala[i].pontos[p][u].pubs[s].sim == true ||
+                        escala[i].pontos[p][u].pubs[s].tipoesc == 'S' ||
+                        // escala[i].pontos[p][u].pubs[s].sim == true ||
                         escala[i].pontos[p][u].pubs[s].nao == true
                       )
                         type = true;
@@ -105,7 +105,7 @@ export class DesignationsComponent implements OnInit {
               .getCongregation()
               .subscribe((congregations: Congregation[]) => {
                 this.congregations = congregations;
-                let congsort = this.congregations;
+                const congsort = this.congregations;
                 congsort.sort((a, b) => {
                   if (a.circuit < b.circuit) return -1;
                   if (a.circuit > b.circuit) return 1;
@@ -131,29 +131,26 @@ export class DesignationsComponent implements OnInit {
   }
 
   getStyle(sex: string) {
-    if (sex == "M") return "blue";
-    if (sex == "F") return "#FF4081";
+    if (sex == 'M') return 'blue';
+    if (sex == 'F') return '#FF4081';
   }
 
   responseYes(esc, grupo) {
+
+    const question = 'Tem certeza que quer CONFIRMAR esta designação ?';
+    const r = confirm(question);
+
+    if (r) {
     let horacode;
-    let iduser = this.userId;
-    let idescala = esc._id;
+    const iduser = this.userId;
+    const idescala = esc._id;
     let indexpub;
-    let conjuge;
-    let indexConjuge;
 
     for (let a = 0; a < grupo.length; a++) {
       for (let s = 0; s < grupo[a].ponto.npubs; s++) {
         if (grupo[a].ponto.pubs[s].userId == this.userId) {
           grupo[a].ponto.pubs[s].sim = true;
           grupo[a].ponto.pubs[s].nao = false;
-          if (grupo[a].ponto.pubs[s].conjuge) {
-            conjuge = grupo[a].ponto.pubs[s].conjuge;
-            indexConjuge = grupo[a].ponto.pubs.findIndex(
-              x => x.userId == conjuge
-            );
-          }
           esc.type = false;
           horacode = grupo[a].hora.code;
           indexpub = s;
@@ -161,7 +158,7 @@ export class DesignationsComponent implements OnInit {
         }
       }
     }
-    let obj = {
+    const obj = {
       idescala: idescala,
       iduser: iduser,
       horacode: horacode,
@@ -170,46 +167,10 @@ export class DesignationsComponent implements OnInit {
       nao: false
     };
 
-    if (conjuge && indexConjuge > -1) {
-      this.authService
-        .ledUpdate(obj)
-        .pipe(
-          switchMap(data => {
-            let obj = {
-              idescala: idescala,
-              iduser: conjuge,
-              horacode: horacode,
-              indexpub: indexConjuge,
-              sim: false,
-              nao: true
-            };
-            return this.authService.ledUpdate(obj);
-          })
-        )
-        .subscribe(
-          data => console.log(data),
-          error => {
-            if (error.title == "Respondido pelo Telegram!") this.rebuild();
-            else {
-              console.log(error);
-              for (let a = 0; a < grupo.length; a++) {
-                for (let s = 0; s < grupo[a].ponto.npubs; s++) {
-                  if (grupo[a].ponto.pubs[s].userId == this.userId) {
-                    esc.type = false;
-                    grupo[a].ponto.pubs[s].sim = false;
-                    grupo[a].ponto.pubs[s].nao = false;
-                  }
-                }
-              }
-            }
-            console.error(error);
-          }
-        );
-    } else {
       this.authService.ledUpdate(obj).subscribe(
         data => console.log(data),
         error => {
-          if (error.title == "Respondido pelo Telegram!") this.rebuild();
+          if (error.title == 'Respondido pelo Telegram!') this.rebuild();
           else {
             console.log(error);
             for (let a = 0; a < grupo.length; a++) {
@@ -225,13 +186,18 @@ export class DesignationsComponent implements OnInit {
           console.error(error);
         }
       );
-    }
+     }
   }
 
   responseNot(esc, grupo) {
+
+    const question = 'Tem certeza que quer RECUSAR esta designação ?';
+    const r = confirm(question);
+
+    if (r) {
     let horacode;
-    let iduser = this.userId;
-    let idescala = esc._id;
+    const iduser = this.userId;
+    const idescala = esc._id;
     let indexpub;
     let conjuge;
     let indexConjuge;
@@ -255,7 +221,7 @@ export class DesignationsComponent implements OnInit {
       }
     }
 
-    let obj = {
+    const obj = {
       idescala: idescala,
       iduser: iduser,
       horacode: horacode,
@@ -268,7 +234,7 @@ export class DesignationsComponent implements OnInit {
         .ledUpdate(obj)
         .pipe(
           switchMap(data => {
-            let obj = {
+            const obj = {
               idescala: idescala,
               iduser: conjuge,
               horacode: horacode,
@@ -284,7 +250,7 @@ export class DesignationsComponent implements OnInit {
             console.log(data);
           },
           error => {
-            if (error.title == "Respondido pelo Telegram!") this.rebuild();
+            if (error.title == 'Respondido pelo Telegram!') this.rebuild();
             else {
               console.log(error);
               for (let a = 0; a < grupo.length; a++) {
@@ -307,7 +273,7 @@ export class DesignationsComponent implements OnInit {
           console.log(data);
         },
         error => {
-          if (error.title == "Respondido pelo Telegram!") this.rebuild();
+          if (error.title == 'Respondido pelo Telegram!') this.rebuild();
           else {
             console.log(error);
             for (let a = 0; a < grupo.length; a++) {
@@ -326,14 +292,15 @@ export class DesignationsComponent implements OnInit {
       );
     }
   }
+  }
 
   designEscala(pub, ponto, escala) {
-    let newdesign = [];
+    const newdesign = [];
     for (let p = 0; p < escala.pontos.length; p++) {
       for (let u = 0; u < escala.pontos[p].length; u++) {
         if (escala.pontos[p][u].id == ponto.id) {
-          console.log("pontoigual", escala.pontos[p][u].id, ponto.id);
-          let corpo = { hora: escala.hora[p], ponto: escala.pontos[p][u] };
+          console.log('pontoigual', escala.pontos[p][u].id, ponto.id);
+          const corpo = { hora: escala.hora[p], ponto: escala.pontos[p][u] };
           newdesign.push(corpo);
           console.log(corpo);
         }
@@ -344,7 +311,7 @@ export class DesignationsComponent implements OnInit {
   }
 
   rebuild() {
-    let escala_aux = [];
+    const escala_aux = [];
     this.authService.getPerfilEscala().subscribe(
       escala => {
         console.log(escala);
@@ -359,7 +326,7 @@ export class DesignationsComponent implements OnInit {
             for (let i = 0; i < escala.length; i++) {
               for (let p = 0; p < escala[i].pontos.length; p++) {
                 for (let u = 0; u < escala[i].pontos[p].length; u++) {
-                  let achei = false;
+                  const achei = false;
                   for (let s = 0; s < escala[i].pontos[p][u].npubs; s++) {
                     if (
                       escala[i].pontos[p][u].pubs[s] == null ||
@@ -367,7 +334,7 @@ export class DesignationsComponent implements OnInit {
                     ) {
                       escala[i].pontos[p][u].pubs[s] = new User();
                     } else {
-                      let led = leds.find(a => {
+                      const led = leds.find(a => {
                         if (
                           a.iduser == escala[i].pontos[p][u].pubs[s].userId &&
                           a.idescala == escala[i]._id &&
@@ -389,8 +356,8 @@ export class DesignationsComponent implements OnInit {
                     if (escala[i].pontos[p][u].pubs[s].userId == this.userId) {
                       let type = false;
                       if (
-                        escala[i].pontos[p][u].pubs[s].tipoesc == "S" ||
-                        //escala[i].pontos[p][u].pubs[s].sim == true ||
+                        escala[i].pontos[p][u].pubs[s].tipoesc == 'S' ||
+                        // escala[i].pontos[p][u].pubs[s].sim == true ||
                         escala[i].pontos[p][u].pubs[s].nao == true
                       )
                         type = true;

@@ -11,6 +11,7 @@ var schema = new Schema({
     code: {type: String, required: true},
     sex: {type: String, required: true},
     user: {type: Schema.Types.ObjectId, ref: 'User'},
+    datareal: {type: Date},
 });
 
 

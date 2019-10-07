@@ -59,7 +59,10 @@ import { ReportComponent } from './report/report.component';
 import { PerfilroleComponent } from './perfilrole/perfilrole.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+import { LOCALE_ID } from '@angular/core';
+registerLocaleData(localePt, 'pt-BR');
 
 
 
@@ -118,7 +121,8 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
             NgxChartsModule,
             BrowserAnimationsModule,
         ],
-        providers: [AuthService, ErrorService, Authguard, Adminguard, Logisticguard, Normalguard, Commonguard, Ctcguard],
+        // tslint:disable-next-line: max-line-length
+        providers: [AuthService, ErrorService, Authguard, Adminguard, Logisticguard, Normalguard, Commonguard, Ctcguard, { provide: LOCALE_ID, useValue: 'pt-BR' }],
         bootstrap: [AppComponent],
 
 })

@@ -8,11 +8,11 @@
     <div class="row">
       <div class="col-md-6">
         <button type="button" id="anterior" (click)="anteriorDia($event)" class="btn btn-default">
-          <i class="fas fa-angle-left"></i>
+          <i class="fa fa-angle-left"></i>
         </button>
         <input name="dia" id="dia" type="date" [(ngModel)]="dia" (change)="onChange()">
         <button type="button" id="proximo" (click)="proximoDia($event)" class="btn btn-default">
-          <i class="fas fa-angle-right"></i>
+          <i class="fa fa-angle-right"></i>
         </button>
         <br>
         <b> {{ diasemana }}</b>

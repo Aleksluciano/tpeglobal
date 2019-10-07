@@ -502,17 +502,17 @@ router.get("/circuito/:id", function(req, res, next) {
     console.log(circuito);
     let circuitos = circuito.filter(f => {
       console.log(req.params.id, f._id);
-      if (req.params.id == "5ae7dee5734d1d133184274f") {
-        if (f.nome != "SP-61") return false; //61
-      }
+      // if (req.params.id == "5ae7dee5734d1d133184274f") {
+      //   if (f.nome != "SP-61") return false; //61
+      // }
 
-      if (req.params.id == "5ae7dfb9734d1d1331842777") {
-        if (f.nome != "SP-76") return false; //76
-      }
+      // if (req.params.id == "5ae7dfb9734d1d1331842777") {
+      //   if (f.nome != "SP-76") return false; //76
+      // }
 
-      if (req.params.id == "5ae7dfa1734d1d1331842774") {
-        if (f.nome != "SP-112") return false; //112
-      }
+      // if (req.params.id == "5ae7dfa1734d1d1331842774") {
+      //   if (f.nome != "SP-112") return false; //112
+      // }
 
       return true;
     });
@@ -815,17 +815,17 @@ router.get("/congregation/:id", function(req, res, next) {
     }
 
     let congregations = congregation.filter(f => {
-      if (req.params.id == "5ae7dee5734d1d133184274f") {
-        if (f.circuit != "SP-61") return false; //61
-      }
+      // if (req.params.id == "5ae7dee5734d1d133184274f") {
+      //   if (f.circuit != "SP-61") return false; //61
+      // }
 
-      if (req.params.id == "5ae7dfb9734d1d1331842777") {
-        if (f.circuit != "SP-76") return false; //76
-      }
+      // if (req.params.id == "5ae7dfb9734d1d1331842777") {
+      //   if (f.circuit != "SP-76") return false; //76
+      // }
 
-      if (req.params.id == "5ae7dfa1734d1d1331842774") {
-        if (f.circuit != "SP-112") return false; //112
-      }
+      // if (req.params.id == "5ae7dfa1734d1d1331842774") {
+      //   if (f.circuit != "SP-112") return false; //112
+      // }
 
       return true;
     });
