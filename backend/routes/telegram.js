@@ -558,7 +558,8 @@ function setUserLed(idescala, iduser, horacode, sim, nao, msg, resposta, conjuge
                         if (iduser != escala.pontos[p][u].pubs[z].userId){
                           userFriend.push(escala.pontos[p][u].pubs[z]);
                           if(!conjugeJarespondeu){
-                          if(escala.pontos[p][u].pubs[s].conjuge){
+                            let achaConjuge = escala.pontos[p][u].pubs.find(k => k.userId == conjuge);
+                          if(escala.pontos[p][u].pubs[s].conjuge && achaConjuge){
                           setTimeout(() => {
                             setUserLed(idescala, escala.pontos[p][u].pubs[z].userId, horacode, sim, nao, msg, resposta, true); 
                           }, 1000);

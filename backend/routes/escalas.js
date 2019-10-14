@@ -46,121 +46,145 @@ cron.schedule("0 20 * * 0-6", function() {
          
             let led = leds[i];
             led.nao = true;
-            led
-            .save()
-            .then(() => {
-            if (led.msg != undefined) {
-              let text = led.msg.text + "\n\u{274C} *Recusado*";
-              telegram.bot
-                .editMessageText(text, {
-                  chat_id: led.msg.chat.id,
-                  message_id: led.msg.message_id,
-                  parse_mode: "Markdown"
-                })
-                .then(() => {
-                  console.log("edit led");
-                })
-                .catch(e => {
-                  console.log(e);
-                });
-            }
-  
-            atualiza_central_via_socket(
-              led.idescala,
-              led.iduser,
-              led.horacode,
-              led.sim,
-              led.nao,
-              "led",
-              " "
-            );
-    
-                for (let p = 0; p < escala.pontos.length; p++) {
-                  for (let u = 0; u < escala.pontos[p].length; u++) {
-                    for (let s = 0; s < escala.pontos[p][u].npubs; s++) {
-                      if (
-                        escala.pontos[p][u].pubs[s].userId == led.iduser &&
-                        escala.hora[p].code == led.horacode
-                      ) {
-                        let irmao = `${escala.pontos[p][u].pubs[s].firstName} ${
-                          escala.pontos[p][u].pubs[s].lastName
-                        }`;
-  
-                        let userFriend = [];
-                        for (
-                          let z = 0;
-                          z < escala.pontos[p][u].pubs.length;
-                          z++
-                        ) {
-                          if (
-                            led.iduser != escala.pontos[p][u].pubs[z].userId
-                          )
-                            userFriend.push(escala.pontos[p][u].pubs[z]);
-                        }
-  
-                        let text = `*Substituição TPE*
-  \nSubstituir: *${irmao}*
-  Dia: *${escala.dia} ${escala.diasemana}*
-  Hora: *${escala.hora[p].hora}*
-  Ponto: *${escala.pontos[p][u].name}*
-  Companheiro: `;
-  
-                        let complement = "";
-                        let parceiroid = "";
-  
-                        userFriend.map(j => {
-                          parceiroid = j.userId;
-  
-                          complement =
-                            complement +
-                            `*${j.firstName} ${j.lastName}*
-  Tel: *${j.mobilephone}*
-  Cong: *${j.congregation.nome}*
-  Circ: *${j.congregation.circuit}*\n`;
-                        });
-  
-                        let question = `\nQuem gostaria de substituir?`;
-                        text = text + complement + question;
-                        let textsub =
-                          "@" +
-                          led.idescala +
-                          "%" +
-                          led.iduser +
-                          "$" +
-                          led.horacode;
-                        console.log(textsub);
-                        console.log(userFriend);
-                        try {
-                          telegram.bot.sendMessage(process.env.GROUPTELEGRAM, text, {
-                            parse_mode: "Markdown",
-                            reply_markup: {
-                              inline_keyboard: [
-                                [
-                                  {
-                                    text: "\u{1F504} Substituir",
-                                    callback_data: textsub
-                                  }
-                                ]
-                              ]
-                            }
-                          });
-                        } catch (er) {
-                          console.log(er);
-                        }
-                      
-                      }
-                    }
-                  }
-                }
-
-                return "schedule recusa OK save";
-              });
+            rejectThem(led, escala);
         
         }
         });
       });
     });
 
+  
+    function rejectThem(led, escala) {
+
+      led
+      .save()
+      .then(() => {
+      if (led.msg != undefined) {
+        let text = led.msg.text + "\n\u{274C} *Recusado*";
+        telegram.bot
+          .editMessageText(text, {
+            chat_id: led.msg.chat.id,
+            message_id: led.msg.message_id,
+            parse_mode: "Markdown"
+          })
+          .then(() => {
+            console.log("edit led");
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
+
+      atualiza_central_via_socket(
+        led.idescala,
+        led.iduser,
+        led.horacode,
+        led.sim,
+        led.nao,
+        "led",
+        " "
+      );
+
+          for (let p = 0; p < escala.pontos.length; p++) {
+            for (let u = 0; u < escala.pontos[p].length; u++) {
+              for (let s = 0; s < escala.pontos[p][u].npubs; s++) {
+                if (
+                  escala.pontos[p][u].pubs[s].userId == led.iduser &&
+                  escala.hora[p].code == led.horacode
+                ) {
+                  let irmao = `${escala.pontos[p][u].pubs[s].firstName} ${
+                    escala.pontos[p][u].pubs[s].lastName
+                  }`;
+
+                  let userFriend = [];
+                  for (
+                    let z = 0;
+                    z < escala.pontos[p][u].pubs.length;
+                    z++
+                  ) {
+                    if (
+                      led.iduser != escala.pontos[p][u].pubs[z].userId
+                    ){
+                      userFriend.push(escala.pontos[p][u].pubs[z]);
+                      if(escala.pontos[p][u].pubs[z].userId == escala.pontos[p][u].pubs[s].conjuge){
+                        Led.findOne({ idescala: escala._id, nao: false, sim: true, horacode: led.horacode, iduser: escala.pontos[p][u].pubs[s].conjuge }, function(err3, ledConjuge) {     
+                          if (err3) {
+                            return console.log("erro ledconjuge");
+                          }
+                      
+                          if (!ledConjuge) {
+                            return console.log("erro ledconjuge");
+                          }
+                          ledConjuge.nao = true;
+                          ledConjuge.sim = false;
+                          setTimeout(() => {
+                            rejectThem(ledConjuge, escala);
+                          }, 1000);
+                      
+                        })
+                      
+                      }
+                    }
+                  }
+
+                  let text = `*Substituição TPE*
+\nSubstituir: *${irmao}*
+Dia: *${escala.dia} ${escala.diasemana}*
+Hora: *${escala.hora[p].hora}*
+Ponto: *${escala.pontos[p][u].name}*
+Companheiro: `;
+
+                  let complement = "";
+                  let parceiroid = "";
+
+                  userFriend.map(j => {
+                    parceiroid = j.userId;
+
+                    complement =
+                      complement +
+                      `*${j.firstName} ${j.lastName}*
+Tel: *${j.mobilephone}*
+Cong: *${j.congregation.nome}*
+Circ: *${j.congregation.circuit}*\n`;
+                  });
+
+                  let question = `\nQuem gostaria de substituir?`;
+                  text = text + complement + question;
+                  let textsub =
+                    "@" +
+                    led.idescala +
+                    "%" +
+                    led.iduser +
+                    "$" +
+                    led.horacode;
+                  console.log(textsub);
+                  console.log(userFriend);
+                  try {
+                    telegram.bot.sendMessage(process.env.GROUPTELEGRAM, text, {
+                      parse_mode: "Markdown",
+                      reply_markup: {
+                        inline_keyboard: [
+                          [
+                            {
+                              text: "\u{1F504} Substituir",
+                              callback_data: textsub
+                            }
+                          ]
+                        ]
+                      }
+                    });
+                  } catch (er) {
+                    console.log(er);
+                  }
+                
+                }
+              }
+            }
+          }
+
+          return "schedule recusa OK save";
+        });
+    }
 
 cron.schedule("0 17 * * 0-6", function() {
   let diaatual = moment.utc().add(1, "day");
