@@ -580,7 +580,7 @@ router.put('/:id', function (req, res, next) {
        }
        else conjuge = req.body.conjuge;
 
-       if(usermaster.email = 'adm@adm.com'){
+       if(usermaster.email == 'adm@adm.com'){
         user.firstName    = req.body.firstName;
         user.lastName     = req.body.lastName;
         //password
